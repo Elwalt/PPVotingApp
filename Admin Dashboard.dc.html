@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 56"><rect width="80" height="56" fill="#f0f3fa"/><rect x="6" y="8" width="18" height="40" rx="3" fill="#4a6fd8"/><rect x="30" y="8" width="44" height="16" rx="3" fill="#c9d6f5"/><rect x="30" y="28" width="44" height="20" rx="3" fill="#c9d6f5"/></svg>
+</template>
+<helmet>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: oklch(0.97 0.006 250); }
+    * { box-sizing: border-box; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: oklch(0.85 0.01 250); border-radius: 4px; }
+  </style>
+</helmet>
+
+<div style="height:100vh; width:100%; background: oklch(0.97 0.006 250); color: oklch(0.22 0.02 260); display:flex; overflow:hidden;">
+
+  <!-- SIDEBAR -->
+  <div style="width:240px; flex-shrink:0; background:#fff; border-right:1px solid oklch(0.9 0.01 250); display:flex; flex-direction:column; padding:22px 16px;">
+    <div style="display:flex; align-items:center; gap:10px; padding:0 8px 24px;">
+      <div style="width:34px; height:34px; border-radius:8px; background: oklch(0.42 0.13 255); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <div style="width:14px; height:14px; border-radius:50%; border:2.5px solid #fff;"></div>
+      </div>
+      <div>
+        <div style="font-weight:800; font-size:14px;">NDC Election</div>
+        <div style="font-size:11px; color:oklch(0.5 0.02 260);">Admin Console</div>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="2">
+        <div onClick="{{ item.onClick }}" style="display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:9px; cursor:pointer; font-size:14px; font-weight:600; background:{{ item.bg }}; color:{{ item.color }};" style-hover="background: oklch(0.96 0.01 255);">
+          <div style="width:8px; height:8px; border-radius:2px; background:{{ item.color }};"></div>
+          {{ item.label }}
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:auto; padding:12px; border-radius:10px; background:oklch(0.96 0.01 255); font-size:12px; color:oklch(0.5 0.02 260); line-height:1.5;">
+      Logged in as <b style="color:oklch(0.3 0.02 260);">Election Officer</b><br/>Session expires in 40 min
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div style="flex:1; overflow-y:auto; padding:32px 40px;">
+
+    <!-- DASHBOARD VIEW -->
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <div style="animation: fadeUp 0.3s ease;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+          <div>
+            <div style="font-family:'Source Serif 4', serif; font-size:26px; font-weight:700;">Live Results Dashboard</div>
+            <div style="font-size:13px; color:oklch(0.5 0.02 260); margin-top:4px;">Real-time vote tallies across all positions</div>
+          </div>
+          <button onClick="{{ onSimulateVotes }}" style="padding:11px 20px; border:none; border-radius:9px; background: oklch(0.42 0.13 255); color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:8px;" style-hover="background: oklch(0.37 0.13 255);">
+            <div style="display:flex; align-items:center; gap:7px;">
+              <div style="width:7px; height:7px; border-radius:50%; background: oklch(0.85 0.05 155);"></div>
+              Simulate New Votes
+            </div>
+          </button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:28px;">
+          <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="font-size:12px; font-weight:600; color:oklch(0.5 0.02 260); margin-bottom:8px;">TOTAL VOTES CAST</div>
+            <div style="font-size:28px; font-weight:800;">{{ totalVotesFormatted }}</div>
+          </div>
+          <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="font-size:12px; font-weight:600; color:oklch(0.5 0.02 260); margin-bottom:8px;">TURNOUT</div>
+            <div style="font-size:28px; font-weight:800;">{{ turnoutPct }}%</div>
+          </div>
+          <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="font-size:12px; font-weight:600; color:oklch(0.5 0.02 260); margin-bottom:8px;">POLLS CLOSE IN</div>
+            <div style="font-size:28px; font-weight:800;">4h 12m</div>
+          </div>
+        </div>
+
+        <!-- CONFIGURE PANEL -->
+        <div style="background:#fff; border-radius:14px; padding:18px 22px; margin-bottom:24px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+          <div style="font-size:13px; font-weight:700; margin-bottom:14px; color:oklch(0.3 0.02 260);">CONFIGURE DASHBOARD</div>
+          <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:center;">
+            <div style="display:flex; flex-wrap:wrap; gap:10px;">
+              <sc-for list="{{ visibilityToggles }}" as="v" hint-placeholder-count="4">
+                <div onClick="{{ v.onToggle }}" style="display:flex; align-items:center; gap:7px; padding:7px 12px; border-radius:20px; border:1.5px solid {{ v.borderColor }}; background:{{ v.bg }}; cursor:pointer; font-size:13px; font-weight:600; color:{{ v.textColor }};">
+                  <div style="width:14px; height:14px; border-radius:4px; border:1.5px solid {{ v.checkBorder }}; background:{{ v.checkBg }}; display:flex; align-items:center; justify-content:center;">
+                    <sc-if value="{{ v.visible }}" hint-placeholder-val="{{ true }}">
+                      <div style="width:6px; height:6px; border-radius:1px; background:#fff;"></div>
+                    </sc-if>
+                  </div>
+                  {{ v.label }}
+                </div>
+              </sc-for>
+            </div>
+            <div style="width:1px; height:24px; background:oklch(0.9 0.01 250);"></div>
+            <div onClick="{{ onToggleSort }}" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:600; color:oklch(0.3 0.02 260);">
+              Sort:
+              <div style="display:flex; background:oklch(0.95 0.01 255); border-radius:8px; padding:3px;">
+                <div style="padding:6px 12px; border-radius:6px; font-size:12px; background:{{ sortByVotesBg }}; color:{{ sortByVotesColor }};">By votes</div>
+                <div style="padding:6px 12px; border-radius:6px; font-size:12px; background:{{ sortAlphaBg }}; color:{{ sortAlphaColor }};">A–Z</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- POSITION RESULT CARDS -->
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:20px;">
+          <sc-for list="{{ visiblePositions }}" as="pos" hint-placeholder-count="4">
+            <div style="background:#fff; border-radius:14px; padding:20px 22px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+              <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;">
+                <div style="font-size:15px; font-weight:700;">{{ pos.title }}</div>
+                <div style="font-size:12px; color:oklch(0.5 0.02 260);">{{ pos.totalVotes }} votes</div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ pos.candidates }}" as="r" hint-placeholder-count="3">
+                  <div>
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+                      <div style="{{ r.photoStyle }}"></div>
+                      <div style="width:26px; height:26px; border-radius:50%; background:oklch(0.89 0.006 250); position:relative; overflow:hidden; flex-shrink:0; display:{{ r.silhouetteDisplay }};">
+                        <div style="position:absolute; width:42%; height:42%; border-radius:50%; background:oklch(0.68 0.006 250); top:16%; left:29%;"></div>
+                        <div style="position:absolute; width:74%; height:46%; border-radius:50% 50% 0 0; background:oklch(0.68 0.006 250); bottom:-4%; left:13%;"></div>
+                      </div>
+                      <div style="flex:1; font-size:13px; font-weight:600;">{{ r.name }}</div>
+                      <div style="font-size:13px; font-weight:800; color:{{ r.avatarColor }};">{{ r.pct }}%</div>
+                    </div>
+                    <div style="height:6px; background:oklch(0.93 0.005 250); border-radius:3px; overflow:hidden;">
+                      <div style="height:100%; width:{{ r.pct }}%; background:{{ r.avatarColor }}; border-radius:3px; transition: width 0.5s ease;"></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- VOTER DATA VIEW -->
+    <sc-if value="{{ isVoterData }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeUp 0.3s ease;">
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'Source Serif 4', serif; font-size:26px; font-weight:700;">Voter Data</div>
+          <div style="font-size:13px; color:oklch(0.5 0.02 260); margin-top:4px;">Import the eligible-voter roll and browse registered voters</div>
+        </div>
+
+        <div style="display:inline-flex; background:oklch(0.95 0.01 255); border-radius:10px; padding:4px; margin-bottom:22px;">
+          <div onClick="{{ onGoImportTab }}" style="padding:9px 18px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; background:{{ importTabBg }}; color:{{ importTabColor }};">Import File</div>
+          <div onClick="{{ onGoViewTab }}" style="padding:9px 18px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; background:{{ viewTabBg }}; color:{{ viewTabColor }};">View Roster</div>
+        </div>
+
+        <sc-if value="{{ isImportTab }}" hint-placeholder-val="{{ true }}">
+        <div>
+
+        <sc-if value="{{ showDropzone }}" hint-placeholder-val="{{ true }}">
+          <label style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:56px 24px; border:2px dashed oklch(0.82 0.01 250); border-radius:16px; background:#fff; cursor:pointer; text-align:center;" style-hover="border-color: oklch(0.6 0.1 255); background: oklch(0.98 0.01 255);">
+            <input type="file" accept=".csv,.xlsx,.xls" onChange="{{ onFileChosen }}" style="display:none;" />
+            <div style="width:48px; height:48px; border-radius:12px; background: oklch(0.94 0.03 255); display:flex; align-items:center; justify-content:center;">
+              <div style="width:18px; height:22px; border:2px solid oklch(0.42 0.13 255); border-radius:2px;"></div>
+            </div>
+            <div style="font-size:15px; font-weight:700;">Click to choose a file, or drag it here</div>
+            <div style="font-size:13px; color:oklch(0.5 0.02 260);">Accepts .csv, .xlsx — expected columns: Name, Membership ID, Constituency, Date of Birth</div>
+          </label>
+        </sc-if>
+
+        <sc-if value="{{ showFileCard }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff; border-radius:14px; padding:20px 22px; box-shadow:0 1px 3px rgba(0,0,0,0.05); display:flex; align-items:center; gap:16px;">
+            <div style="width:44px; height:44px; border-radius:10px; background: oklch(0.94 0.03 255); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <div style="width:16px; height:20px; border:2px solid oklch(0.42 0.13 255); border-radius:2px;"></div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px; font-weight:700;">{{ voterFileName }}</div>
+              <div style="font-size:12px; color:oklch(0.5 0.02 260);">{{ voterFileSize }}</div>
+            </div>
+            <button onClick="{{ onResetFile }}" style="background:none; border:none; padding:6px 10px; font-size:12px; font-weight:600; color: oklch(0.5 0.19 25); cursor:pointer; font-family:inherit; border-radius:6px;" style-hover="background: oklch(0.96 0.03 25);">
+              Remove
+            </button>
+            <button onClick="{{ onProcessImport }}" disabled="{{ isProcessing }}" style="padding:11px 20px; border:none; border-radius:9px; background: oklch(0.42 0.13 255); color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:9px;" style-hover="background: oklch(0.37 0.13 255);">
+              <sc-if value="{{ isProcessing }}" hint-placeholder-val="{{ false }}">
+                <div style="width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; animation: spin 0.7s linear infinite;"></div>
+              </sc-if>
+              {{ processButtonLabel }}
+            </button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showImportSummary }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:20px;">
+            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:20px;">
+              <div style="background:#fff; border-radius:14px; padding:18px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size:11px; font-weight:600; color:oklch(0.5 0.02 260); margin-bottom:6px;">TOTAL RECORDS</div>
+                <div style="font-size:22px; font-weight:800;">{{ importStats.total }}</div>
+              </div>
+              <div style="background:#fff; border-radius:14px; padding:18px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size:11px; font-weight:600; color:oklch(0.5 0.02 260); margin-bottom:6px;">VALID</div>
+                <div style="font-size:22px; font-weight:800; color:oklch(0.55 0.14 155);">{{ importStats.valid }}</div>
+              </div>
+              <div style="background:#fff; border-radius:14px; padding:18px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size:11px; font-weight:600; color:oklch(0.5 0.02 260); margin-bottom:6px;">DUPLICATES</div>
+                <div style="font-size:22px; font-weight:800; color:oklch(0.65 0.14 80);">{{ importStats.duplicates }}</div>
+              </div>
+              <div style="background:#fff; border-radius:14px; padding:18px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size:11px; font-weight:600; color:oklch(0.5 0.02 260); margin-bottom:6px;">ERRORS</div>
+                <div style="font-size:22px; font-weight:800; color:oklch(0.5 0.19 25);">{{ importStats.errors }}</div>
+              </div>
+            </div>
+
+            <div style="background:#fff; border-radius:14px; padding:8px; box-shadow:0 1px 3px rgba(0,0,0,0.05); overflow:hidden;">
+              <div style="display:grid; grid-template-columns:2fr 1.4fr 1.4fr 1fr; padding:12px 16px; font-size:11px; font-weight:700; color:oklch(0.5 0.02 260); letter-spacing:0.3px;">
+                <div>NAME</div><div>MEMBERSHIP ID</div><div>CONSTITUENCY</div><div>STATUS</div>
+              </div>
+              <sc-for list="{{ voterRows }}" as="row" hint-placeholder-count="8">
+                <div style="display:grid; grid-template-columns:2fr 1.4fr 1.4fr 1fr; padding:12px 16px; font-size:13px; border-top:1px solid oklch(0.95 0.005 250); align-items:center;">
+                  <div style="font-weight:600;">{{ row.name }}</div>
+                  <div style="color:oklch(0.5 0.02 260); font-family:monospace;">{{ row.memberId }}</div>
+                  <div style="color:oklch(0.5 0.02 260);">{{ row.constituency }}</div>
+                  <div>
+                    <span style="font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; background:{{ row.statusBg }}; color:{{ row.statusColor }};">{{ row.status }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+              <button onClick="{{ onResetFile }}" style="padding:11px 20px; border:1.5px solid oklch(0.88 0.01 250); border-radius:9px; background:#fff; color:oklch(0.3 0.02 260); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit;">
+                Import Another File
+              </button>
+              <button style="padding:11px 20px; border:none; border-radius:9px; background: oklch(0.42 0.13 255); color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;" style-hover="background: oklch(0.37 0.13 255);">
+                Confirm & Add to Voter Roll
+              </button>
+            </div>
+          </div>
+        </sc-if>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ isViewTab }}" hint-placeholder-val="{{ false }}">
+        <div>
+
+        <input value="{{ voterSearch }}" onChange="{{ onVoterSearchChange }}" placeholder="Search by name or membership ID…" style="width:100%; padding:12px 16px; border-radius:10px; border:1.5px solid oklch(0.88 0.01 250); font-size:14px; font-family:inherit; outline:none; margin-bottom:16px; background:#fff;" style-focus="border-color: oklch(0.55 0.14 255);" />
+
+        <div style="background:#fff; border-radius:14px; padding:8px; box-shadow:0 1px 3px rgba(0,0,0,0.05); overflow:hidden;">
+          <div style="display:grid; grid-template-columns:2fr 1.4fr 1.6fr 1fr; padding:12px 16px; font-size:11px; font-weight:700; color:oklch(0.5 0.02 260); letter-spacing:0.3px;">
+            <div>NAME</div><div>MEMBERSHIP ID</div><div>CONSTITUENCY</div><div>STATUS</div>
+          </div>
+          <sc-for list="{{ filteredVoters }}" as="v" hint-placeholder-count="8">
+            <div style="display:grid; grid-template-columns:2fr 1.4fr 1.6fr 1fr; padding:12px 16px; font-size:13px; border-top:1px solid oklch(0.95 0.005 250); align-items:center;">
+              <div style="font-weight:600;">{{ v.name }}</div>
+              <div style="color:oklch(0.5 0.02 260); font-family:monospace;">{{ v.memberId }}</div>
+              <div style="color:oklch(0.5 0.02 260);">{{ v.constituency }}</div>
+              <div>
+                <span style="font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; background:{{ v.votedBg }}; color:{{ v.votedColor }};">{{ v.votedLabel }}</span>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noVotersFound }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:32px 16px; text-align:center; font-size:13px; color:oklch(0.5 0.02 260);">No voters match your search.</div>
+          </sc-if>
+        </div>
+        </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- ELECTIONS VIEW -->
+    <sc-if value="{{ isElections }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeUp 0.3s ease;">
+        <div style="margin-bottom:24px;">
+          <div style="font-family:'Source Serif 4', serif; font-size:26px; font-weight:700;">Elections</div>
+          <div style="font-size:13px; color:oklch(0.5 0.02 260); margin-top:4px;">Control the current voting period and review past elections</div>
+        </div>
+
+        <div style="background:#fff; border-radius:14px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.05); margin-bottom:28px;">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+                <div style="font-size:17px; font-weight:700;">{{ election.name }}</div>
+                <span style="font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:{{ electionStatusBg }}; color:{{ electionStatusColor }};">{{ electionStatusLabel }}</span>
+              </div>
+              <div style="font-size:13px; color:oklch(0.5 0.02 260);">Opens {{ election.opens }} · Closes {{ election.closes }}</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px;">
+            <sc-if value="{{ isElectionActive }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex; align-items:center; gap:8px; border:1.5px solid oklch(0.88 0.01 250); border-radius:9px; padding:0 4px 0 14px;">
+                <span style="font-size:13px; font-weight:600; color:oklch(0.4 0.02 260);">Extend by</span>
+                <input type="number" min="1" max="24" value="{{ extendHoursInput }}" onChange="{{ onExtendHoursChange }}" style="width:52px; padding:9px 6px; border:none; font-size:14px; font-family:inherit; outline:none; text-align:center;" />
+                <span style="font-size:13px; font-weight:600; color:oklch(0.4 0.02 260);">hrs</span>
+                <button onClick="{{ onExtendElection }}" style="padding:9px 16px; border:none; border-radius:7px; background:oklch(0.94 0.03 255); color:oklch(0.42 0.13 255); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; margin:4px;" style-hover="background: oklch(0.9 0.04 255);">
+                  Apply
+                </button>
+              </div>
+              <button onClick="{{ onEndElection }}" style="padding:11px 20px; border:none; border-radius:9px; background: oklch(0.5 0.19 25); color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;" style-hover="background: oklch(0.44 0.19 25);">
+                End Election Now
+              </button>
+            </sc-if>
+            <sc-if value="{{ isElectionEnded }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ onStartElection }}" style="padding:11px 20px; border:none; border-radius:9px; background: oklch(0.42 0.13 255); color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;" style-hover="background: oklch(0.37 0.13 255);">
+                Start New Election Period
+              </button>
+            </sc-if>
+            <button onClick="{{ onOpenScheduleModal }}" style="padding:11px 20px; border:1.5px dashed oklch(0.82 0.01 250); border-radius:9px; background:none; color:oklch(0.42 0.13 255); font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;" style-hover="background: oklch(0.97 0.02 255);">
+              + Schedule Election
+            </button>
+          </div>
+        </div>
+
+        <sc-if value="{{ hasScheduled }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:28px;">
+            <div style="font-size:13px; font-weight:700; margin-bottom:14px; color:oklch(0.3 0.02 260);">UPCOMING ELECTIONS</div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <sc-for list="{{ scheduledElections }}" as="sc" hint-placeholder-count="2">
+                <div style="background:#fff; border-radius:14px; padding:18px 22px; box-shadow:0 1px 3px rgba(0,0,0,0.05); display:flex; align-items:center; gap:20px;">
+                  <div style="flex:1;">
+                    <div style="font-size:15px; font-weight:700;">{{ sc.name }}</div>
+                    <div style="font-size:12px; color:oklch(0.5 0.02 260); margin-top:2px;">Opens {{ sc.opens }} · Closes {{ sc.closes }}</div>
+                  </div>
+                  <span style="font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:oklch(0.95 0.05 80); color:oklch(0.5 0.14 80);">Scheduled</span>
+                  <button onClick="{{ sc.onStartNow }}" style="padding:9px 16px; border:none; border-radius:9px; background: oklch(0.42 0.13 255); color:#fff; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;" style-hover="background: oklch(0.37 0.13 255);">
+                    Start Now
+                  </button>
+                  <button onClick="{{ sc.onCancel }}" style="padding:9px 14px; border:1.5px solid oklch(0.88 0.01 250); border-radius:9px; background:#fff; color:oklch(0.5 0.19 25); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;" style-hover="background: oklch(0.97 0.03 25);">
+                    Cancel
+                  </button>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="font-size:13px; font-weight:700; margin-bottom:14px; color:oklch(0.3 0.02 260);">PREVIOUSLY RUN ELECTIONS</div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <sc-for list="{{ pastElections }}" as="e" hint-placeholder-count="3">
+            <div style="background:#fff; border-radius:14px; padding:18px 22px; box-shadow:0 1px 3px rgba(0,0,0,0.05); display:flex; align-items:center; gap:20px;">
+              <div style="flex:1;">
+                <div style="font-size:15px; font-weight:700;">{{ e.name }}</div>
+                <div style="font-size:12px; color:oklch(0.5 0.02 260); margin-top:2px;">{{ e.dateRange }} · {{ e.totalVotes }} votes · {{ e.turnout }}% turnout</div>
+              </div>
+              <span style="font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:oklch(0.94 0.06 155); color:oklch(0.4 0.14 155);">{{ e.status }}</span>
+              <button onClick="{{ e.onOpenDetails }}" style="padding:9px 16px; border:1.5px solid oklch(0.88 0.01 250); border-radius:9px; background:#fff; color:oklch(0.3 0.02 260); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;" style-hover="background: oklch(0.97 0.005 250);">
+                View Details
+              </button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ELECTION DETAILS MODAL -->
+    <sc-if value="{{ showElectionDetails }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed; inset:0; background:rgba(20,25,40,0.4); display:flex; align-items:center; justify-content:center; z-index:100;">
+        <div style="width:480px; background:#fff; border-radius:16px; padding:32px; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation: popIn 0.2s ease;">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:6px;">
+            <div style="font-family:'Source Serif 4', serif; font-size:20px; font-weight:700;">{{ electionDetails.name }}</div>
+            <button onClick="{{ onCloseDetails }}" style="background:none; border:none; font-size:18px; cursor:pointer; color:oklch(0.5 0.02 260); font-family:inherit; line-height:1;">×</button>
+          </div>
+          <div style="font-size:13px; color:oklch(0.5 0.02 260); margin-bottom:20px;">{{ electionDetails.dateRange }} · {{ electionDetails.totalVotes }} votes · {{ electionDetails.turnout }}% turnout</div>
+
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <sc-for list="{{ electionDetails.winners }}" as="w" hint-placeholder-count="4">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:oklch(0.97 0.005 250); border-radius:10px;">
+                <div>
+                  <div style="font-size:11px; font-weight:700; letter-spacing:0.3px; color:oklch(0.5 0.02 260);">{{ w.position }}</div>
+                  <div style="font-size:14px; font-weight:700;">{{ w.name }}</div>
+                </div>
+                <div style="font-size:14px; font-weight:800; color:oklch(0.42 0.13 255);">{{ w.pct }}%</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- SCHEDULE ELECTION MODAL -->
+    <sc-if value="{{ showScheduleModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed; inset:0; background:rgba(20,25,40,0.4); display:flex; align-items:center; justify-content:center; z-index:100;">
+        <div style="width:420px; background:#fff; border-radius:16px; padding:32px; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation: popIn 0.2s ease;">
+          <div style="font-family:'Source Serif 4', serif; font-size:20px; font-weight:700; margin-bottom:18px;">Schedule Election</div>
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div>
+              <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:oklch(0.4 0.02 260);">ELECTION NAME</div>
+              <input value="{{ newSchedName }}" onChange="{{ onNewSchedNameChange }}" placeholder="e.g. 2030 NDC Leadership Election" style="width:100%; padding:11px 13px; border-radius:9px; border:1.5px solid oklch(0.88 0.01 250); font-size:14px; font-family:inherit; outline:none;" style-focus="border-color: oklch(0.55 0.14 255);" />
+            </div>
+            <div>
+              <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:oklch(0.4 0.02 260);">OPENS</div>
+              <input type="datetime-local" value="{{ newSchedStart }}" onChange="{{ onNewSchedStartChange }}" style="width:100%; padding:11px 13px; border-radius:9px; border:1.5px solid oklch(0.88 0.01 250); font-size:14px; font-family:inherit; outline:none; color:oklch(0.3 0.02 260);" />
+            </div>
+            <div>
+              <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:oklch(0.4 0.02 260);">CLOSES</div>
+              <input type="datetime-local" value="{{ newSchedEnd }}" onChange="{{ onNewSchedEndChange }}" style="width:100%; padding:11px 13px; border-radius:9px; border:1.5px solid oklch(0.88 0.01 250); font-size:14px; font-family:inherit; outline:none; color:oklch(0.3 0.02 260);" />
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:22px;">
+            <button onClick="{{ onCancelScheduleModal }}" style="flex:1; padding:11px; border:1.5px solid oklch(0.88 0.01 250); border-radius:9px; background:#fff; color:oklch(0.3 0.02 260); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit;">Cancel</button>
+            <button onClick="{{ onCreateSchedule }}" disabled="{{ scheduleDisabled }}" style="flex:1; padding:11px; border:none; border-radius:9px; background: {{ scheduleBtnBg }}; color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;">Schedule</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- USER ADMIN VIEW -->
+    <sc-if value="{{ isUserAdmin }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeUp 0.3s ease;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+          <div>
+            <div style="font-family:'Source Serif 4', serif; font-size:26px; font-weight:700;">User Admin</div>
+            <div style="font-size:13px; color:oklch(0.5 0.02 260); margin-top:4px;">Create custom roles and assign which views each role can access</div>
+          </div>
+          <button onClick="{{ onOpenCreateRole }}" style="padding:11px 20px; border:none; border-radius:9px; background: oklch(0.42 0.13 255); color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;" style-hover="background: oklch(0.37 0.13 255);">
+            + Create Role
+          </button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <sc-for list="{{ roleCards }}" as="role" hint-placeholder-count="3">
+            <div style="background:#fff; border-radius:14px; padding:20px 24px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+              <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="font-size:16px; font-weight:700;">{{ role.name }}</div>
+                  <sc-if value="{{ role.isDefault }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; background:oklch(0.95 0.01 250); color:oklch(0.5 0.02 260);">Default</span>
+                  </sc-if>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button onClick="{{ role.onEdit }}" style="padding:7px 14px; border:1.5px solid oklch(0.88 0.01 250); border-radius:8px; background:#fff; color:oklch(0.3 0.02 260); font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;" style-hover="background: oklch(0.97 0.005 250);">
+                    Edit
+                  </button>
+                  <button onClick="{{ role.onDelete }}" style="padding:7px 12px; border:none; background:none; color: oklch(0.5 0.19 25); font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; border-radius:8px;" style-hover="background: oklch(0.96 0.03 25);">
+                    Delete
+                  </button>
+                </div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <sc-for list="{{ role.permChips }}" as="chip" hint-placeholder-count="2">
+                  <span style="font-size:12px; font-weight:600; padding:5px 11px; border-radius:20px; background:oklch(0.94 0.03 255); color:oklch(0.42 0.13 255);">{{ chip }}</span>
+                </sc-for>
+                <sc-if value="{{ role.hasNoPerms }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:12px; color:oklch(0.5 0.02 260);">No views assigned</span>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- CREATE/EDIT ROLE MODAL -->
+    <sc-if value="{{ showRoleModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed; inset:0; background:rgba(20,25,40,0.4); display:flex; align-items:center; justify-content:center; z-index:100;">
+        <div style="width:440px; background:#fff; border-radius:16px; padding:32px; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation: popIn 0.2s ease;">
+          <div style="font-family:'Source Serif 4', serif; font-size:20px; font-weight:700; margin-bottom:18px;">{{ roleModalTitle }}</div>
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div>
+              <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:oklch(0.4 0.02 260);">ROLE NAME</div>
+              <input value="{{ newRoleName }}" onChange="{{ onNewRoleNameChange }}" placeholder="e.g. Regional Coordinator" style="width:100%; padding:11px 13px; border-radius:9px; border:1.5px solid oklch(0.88 0.01 250); font-size:14px; font-family:inherit; outline:none;" style-focus="border-color: oklch(0.55 0.14 255);" />
+            </div>
+            <div>
+              <div style="font-size:12px; font-weight:600; margin-bottom:8px; color:oklch(0.4 0.02 260);">VIEWS & FUNCTIONALITY</div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <sc-for list="{{ permissionToggles }}" as="perm" hint-placeholder-count="5">
+                  <div onClick="{{ perm.onToggle }}" style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px; background:oklch(0.97 0.005 250); cursor:pointer;">
+                    <div style="width:16px; height:16px; border-radius:4px; border:1.5px solid {{ perm.checkBorder }}; background:{{ perm.checkBg }}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                      <sc-if value="{{ perm.checked }}" hint-placeholder-val="{{ false }}">
+                        <div style="width:7px; height:7px; border-radius:1px; background:#fff;"></div>
+                      </sc-if>
+                    </div>
+                    <div style="font-size:13px; font-weight:600;">{{ perm.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:22px;">
+            <button onClick="{{ onCancelRoleModal }}" style="flex:1; padding:11px; border:1.5px solid oklch(0.88 0.01 250); border-radius:9px; background:#fff; color:oklch(0.3 0.02 260); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit;">Cancel</button>
+            <button onClick="{{ onSaveRole }}" disabled="{{ roleSaveDisabled }}" style="flex:1; padding:11px; border:none; border-radius:9px; background: {{ roleSaveBg }}; color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;">Save Role</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- MANAGE VIEW -->
+    <sc-if value="{{ isManage }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeUp 0.3s ease;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+          <div>
+            <div style="font-family:'Source Serif 4', serif; font-size:26px; font-weight:700;">Positions & Candidates</div>
+            <div style="font-size:13px; color:oklch(0.5 0.02 260); margin-top:4px;">Manage what's on the ballot</div>
+          </div>
+          <button onClick="{{ onOpenAddPosition }}" style="padding:11px 20px; border:none; border-radius:9px; background: oklch(0.42 0.13 255); color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;" style-hover="background: oklch(0.37 0.13 255);">
+            + Add Position
+          </button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:18px;">
+          <sc-for list="{{ managePositions }}" as="pos" hint-placeholder-count="4">
+            <div style="background:#fff; border-radius:14px; padding:22px 24px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+              <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px;">
+                <div>
+                  <div style="font-size:16px; font-weight:700;">{{ pos.title }}</div>
+                  <div style="font-size:13px; color:oklch(0.5 0.02 260); margin-top:3px;">{{ pos.description }}</div>
+                </div>
+                <button onClick="{{ pos.onDelete }}" style="background:none; border:none; padding:6px 10px; font-size:12px; font-weight:600; color: oklch(0.5 0.19 25); cursor:pointer; font-family:inherit; border-radius:6px;" style-hover="background: oklch(0.96 0.03 25);">
+                  Delete Position
+                </button>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <sc-for list="{{ pos.candidates }}" as="c" hint-placeholder-count="3">
+                  <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:oklch(0.97 0.005 250); border-radius:10px;">
+                    <div style="{{ c.photoStyle }}"></div>
+                    <div style="width:34px; height:34px; border-radius:50%; background:oklch(0.89 0.006 250); position:relative; overflow:hidden; flex-shrink:0; display:{{ c.silhouetteDisplay }};">
+                      <div style="position:absolute; width:42%; height:42%; border-radius:50%; background:oklch(0.68 0.006 250); top:16%; left:29%;"></div>
+                      <div style="position:absolute; width:74%; height:46%; border-radius:50% 50% 0 0; background:oklch(0.68 0.006 250); bottom:-4%; left:13%;"></div>
+                    </div>
+                    <div style="flex:1;">
+                      <div style="font-size:14px; font-weight:700;">{{ c.name }}</div>
+                      <div style="font-size:12px; color:oklch(0.5 0.02 260);">{{ c.tagline }}</div>
+                    </div>
+                    <div style="font-size:12px; color:oklch(0.5 0.02 260); margin-right:8px;">{{ c.votes }} votes</div>
+                    <button onClick="{{ c.onDelete }}" style="background:none; border:none; padding:6px 8px; font-size:12px; font-weight:600; color: oklch(0.5 0.19 25); cursor:pointer; font-family:inherit; border-radius:6px;" style-hover="background: oklch(0.94 0.03 25);">
+                      Remove
+                    </button>
+                  </div>
+                </sc-for>
+              </div>
+
+              <button onClick="{{ pos.onAddCandidate }}" style="margin-top:12px; padding:9px 16px; border:1.5px dashed oklch(0.85 0.01 250); border-radius:9px; background:none; color:oklch(0.42 0.13 255); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; width:100%;" style-hover="background: oklch(0.97 0.02 255);">
+                + Add Candidate
+              </button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- ADD POSITION MODAL -->
+  <sc-if value="{{ showAddPosition }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; inset:0; background:rgba(20,25,40,0.4); display:flex; align-items:center; justify-content:center; z-index:100;">
+      <div style="width:420px; background:#fff; border-radius:16px; padding:32px; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation: popIn 0.2s ease;">
+        <div style="font-family:'Source Serif 4', serif; font-size:20px; font-weight:700; margin-bottom:18px;">Add Position</div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:oklch(0.4 0.02 260);">POSITION TITLE</div>
+            <input value="{{ newPositionTitle }}" onChange="{{ onNewPositionTitleChange }}" placeholder="e.g. Financial Secretary" style="width:100%; padding:11px 13px; border-radius:9px; border:1.5px solid oklch(0.88 0.01 250); font-size:14px; font-family:inherit; outline:none;" style-focus="border-color: oklch(0.55 0.14 255);" />
+          </div>
+          <div>
+            <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:oklch(0.4 0.02 260);">DESCRIPTION</div>
+            <input value="{{ newPositionDesc }}" onChange="{{ onNewPositionDescChange }}" placeholder="Short description shown to voters" style="width:100%; padding:11px 13px; border-radius:9px; border:1.5px solid oklch(0.88 0.01 250); font-size:14px; font-family:inherit; outline:none;" style-focus="border-color: oklch(0.55 0.14 255);" />
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:22px;">
+          <button onClick="{{ onCancelAddPosition }}" style="flex:1; padding:11px; border:1.5px solid oklch(0.88 0.01 250); border-radius:9px; background:#fff; color:oklch(0.3 0.02 260); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit;">Cancel</button>
+          <button onClick="{{ onCreatePosition }}" disabled="{{ addPositionDisabled }}" style="flex:1; padding:11px; border:none; border-radius:9px; background: {{ addPositionBg }}; color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;">Create</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ADD CANDIDATE MODAL -->
+  <sc-if value="{{ showAddCandidate }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; inset:0; background:rgba(20,25,40,0.4); display:flex; align-items:center; justify-content:center; z-index:100;">
+      <div style="width:420px; background:#fff; border-radius:16px; padding:32px; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation: popIn 0.2s ease;">
+        <div style="font-family:'Source Serif 4', serif; font-size:20px; font-weight:700; margin-bottom:4px;">Add Candidate</div>
+        <div style="font-size:13px; color:oklch(0.5 0.02 260); margin-bottom:18px;">for {{ addCandidatePositionTitle }}</div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="{{ newCandidatePhotoStyle }}"></div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+              <div style="font-size:12px; font-weight:600; color:oklch(0.4 0.02 260);">PHOTO</div>
+              <div style="display:flex; gap:8px;">
+                <label style="padding:8px 14px; border-radius:8px; border:1.5px solid oklch(0.88 0.01 250); background:#fff; font-size:12px; font-weight:600; color:oklch(0.3 0.02 260); cursor:pointer;" style-hover="background: oklch(0.97 0.005 250);">
+                  Upload Photo
+                  <input type="file" accept="image/*" onChange="{{ onCandidatePhotoChosen }}" style="display:none;" />
+                </label>
+                <sc-if value="{{ hasCandidatePhoto }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ onRemoveCandidatePhoto }}" style="padding:8px 12px; border:none; background:none; font-size:12px; font-weight:600; color:oklch(0.5 0.19 25); cursor:pointer; font-family:inherit; border-radius:8px;" style-hover="background: oklch(0.96 0.03 25);">Remove</button>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:oklch(0.4 0.02 260);">FULL NAME</div>
+            <input value="{{ newCandidateName }}" onChange="{{ onNewCandidateNameChange }}" placeholder="e.g. Comfort Adusei" style="width:100%; padding:11px 13px; border-radius:9px; border:1.5px solid oklch(0.88 0.01 250); font-size:14px; font-family:inherit; outline:none;" style-focus="border-color: oklch(0.55 0.14 255);" />
+          </div>
+          <div>
+            <div style="font-size:12px; font-weight:600; margin-bottom:6px; color:oklch(0.4 0.02 260);">TAGLINE</div>
+            <input value="{{ newCandidateTagline }}" onChange="{{ onNewCandidateTaglineChange }}" placeholder="e.g. Regional Secretary" style="width:100%; padding:11px 13px; border-radius:9px; border:1.5px solid oklch(0.88 0.01 250); font-size:14px; font-family:inherit; outline:none;" style-focus="border-color: oklch(0.55 0.14 255);" />
+          </div>
+          <div>
+            <div style="font-size:12px; font-weight:600; margin-bottom:8px; color:oklch(0.4 0.02 260);">AVATAR COLOR</div>
+            <div style="display:flex; gap:10px;">
+              <sc-for list="{{ colorSwatches }}" as="sw" hint-placeholder-count="5">
+                <div onClick="{{ sw.onSelect }}" style="width:30px; height:30px; border-radius:50%; background:{{ sw.color }}; cursor:pointer; border:2.5px solid {{ sw.ringColor }};"></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:22px;">
+          <button onClick="{{ onCancelAddCandidate }}" style="flex:1; padding:11px; border:1.5px solid oklch(0.88 0.01 250); border-radius:9px; background:#fff; color:oklch(0.3 0.02 260); font-size:14px; font-weight:600; cursor:pointer; font-family:inherit;">Cancel</button>
+          <button onClick="{{ onCreateCandidate }}" disabled="{{ addCandidateDisabled }}" style="flex:1; padding:11px; border:none; border-radius:9px; background: {{ addCandidateBg }}; color:#fff; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;">Add</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'dashboard',
+    positions: [
+      {
+        id: 'chair', title: 'National Chairperson', description: 'Leads the party for the next term.',
+        candidates: [
+          { id: 'a', name: 'Amara Boateng', initials: 'AB', tagline: 'Party Treasurer, 12 years', avatarColor: 'oklch(0.55 0.14 255)', votes: 18321 },
+          { id: 'b', name: 'Kwesi Osei', initials: 'KO', tagline: 'Regional Youth Coordinator', avatarColor: 'oklch(0.6 0.14 155)', votes: 13982 },
+          { id: 'c', name: 'Efua Mensah', initials: 'EM', tagline: 'Former Deputy Chairperson', avatarColor: 'oklch(0.62 0.16 40)', votes: 10123 },
+          { id: 'd', name: 'Yaw Antwi', initials: 'YA', tagline: 'Constituency Chair, Ashanti', avatarColor: 'oklch(0.58 0.14 300)', votes: 5787 },
+        ],
+      },
+      {
+        id: 'deputy', title: 'Deputy Chairperson', description: 'Serves as second-in-command.',
+        candidates: [
+          { id: 'e', name: 'Naomi Adjei', initials: 'NA', tagline: 'National Organizer', avatarColor: 'oklch(0.55 0.15 200)', votes: 21214 },
+          { id: 'f', name: 'Isaac Owusu', initials: 'IO', tagline: 'Legal Affairs Committee Chair', avatarColor: 'oklch(0.6 0.15 90)', votes: 15901 },
+          { id: 'g', name: 'Grace Appiah', initials: 'GA', tagline: 'Women\u2019s Wing Coordinator', avatarColor: 'oklch(0.58 0.16 20)', votes: 11098 },
+        ],
+      },
+      {
+        id: 'secgen', title: 'General Secretary', description: 'Oversees day-to-day party operations.',
+        candidates: [
+          { id: 'h', name: 'Daniel Frimpong', initials: 'DF', tagline: 'Communications Director', avatarColor: 'oklch(0.56 0.14 255)', votes: 19760 },
+          { id: 'i', name: 'Patience Darko', initials: 'PD', tagline: 'Former MP, Central Region', avatarColor: 'oklch(0.6 0.14 155)', votes: 17352 },
+          { id: 'j', name: 'Robert Sarpong', initials: 'RS', tagline: 'District Coordinator, 8 years', avatarColor: 'oklch(0.6 0.16 300)', votes: 11101 },
+        ],
+      },
+      {
+        id: 'youth', title: 'National Youth Organizer', description: 'Leads youth engagement and mobilization.',
+        candidates: [
+          { id: 'k', name: 'Selorm Tetteh', initials: 'ST', tagline: 'Student Wing President', avatarColor: 'oklch(0.6 0.16 40)', votes: 25088 },
+          { id: 'l', name: 'Abena Yeboah', initials: 'AY', tagline: 'Community Organizer, Tamale', avatarColor: 'oklch(0.55 0.15 255)', votes: 14477 },
+          { id: 'm', name: 'Michael Asante', initials: 'MA', tagline: 'Digital Campaigns Lead', avatarColor: 'oklch(0.58 0.14 200)', votes: 8690 },
+        ],
+      },
+    ],
+    visibility: { chair: true, deputy: true, secgen: true, youth: true },
+    sortByVotes: true,
+
+    showAddPosition: false,
+    newPositionTitle: '',
+    newPositionDesc: '',
+
+    showAddCandidate: false,
+    addCandidateForPosId: null,
+    newCandidateName: '',
+    newCandidateTagline: '',
+    newCandidateColor: 'oklch(0.55 0.14 255)',
+    newCandidatePhoto: null,
+
+    voterFileName: null,
+    voterFileSize: '',
+    isProcessing: false,
+    importDone: false,
+
+    voterSearch: '',
+    voterSubTab: 'import',
+
+    election: {
+      name: '2026 NDC Leadership Election',
+      status: 'active',
+      opens: 'Jul 12, 2026 · 8:00 AM',
+      closes: 'Jul 12, 2026 · 8:00 PM',
+      extendHours: 0,
+    },
+    extendHoursInput: 2,
+    showExtendMenu: false,
+    showDetailsForId: null,
+
+    scheduledElections: [],
+    showScheduleModal: false,
+    newSchedName: '',
+    newSchedStart: '',
+    newSchedEnd: '',
+
+    roles: [
+      { id: 'r-super', name: 'Super Admin', isDefault: true, permissions: { dashboard: true, manage: true, voterdata: true, elections: true, useradmin: true } },
+      { id: 'r-officer', name: 'Election Officer', isDefault: true, permissions: { dashboard: true, manage: false, voterdata: false, elections: true, useradmin: false } },
+      { id: 'r-clerk', name: 'Data Clerk', isDefault: true, permissions: { dashboard: false, manage: false, voterdata: true, elections: false, useradmin: false } },
+    ],
+    showRoleModal: false,
+    editingRoleId: null,
+    newRoleName: '',
+    newRolePermissions: {},
+  };
+
+  permissionList = [
+    { key: 'dashboard', label: 'Live Results Dashboard' },
+    { key: 'manage', label: 'Positions & Candidates' },
+    { key: 'voterdata', label: 'Voter Data' },
+    { key: 'elections', label: 'Elections' },
+    { key: 'useradmin', label: 'User Admin' },
+  ];
+
+  extendOptions = [1, 2, 4, 6, 12, 24];
+
+  pastElections = [
+    {
+      id: 'e1', name: '2022 NDC Leadership Election', dateRange: 'Jun 4, 2022', totalVotes: '41,908', turnout: 68, status: 'Certified',
+      winners: [
+        { position: 'National Chairperson', name: 'Kwabena Sarfo', pct: 54 },
+        { position: 'Deputy Chairperson', name: 'Naomi Adjei', pct: 61 },
+        { position: 'General Secretary', name: 'Daniel Frimpong', pct: 49 },
+        { position: 'National Youth Organizer', name: 'Selorm Tetteh', pct: 57 },
+      ],
+    },
+    {
+      id: 'e2', name: '2018 NDC Leadership Election', dateRange: 'May 19, 2018', totalVotes: '35,214', turnout: 61, status: 'Certified',
+      winners: [
+        { position: 'National Chairperson', name: 'Efua Mensah', pct: 51 },
+        { position: 'Deputy Chairperson', name: 'Isaac Owusu', pct: 58 },
+        { position: 'General Secretary', name: 'Patience Darko', pct: 63 },
+        { position: 'National Youth Organizer', name: 'Michael Asante', pct: 46 },
+      ],
+    },
+    {
+      id: 'e3', name: '2014 NDC Leadership Election', dateRange: 'Apr 22, 2014', totalVotes: '28,776', turnout: 55, status: 'Certified',
+      winners: [
+        { position: 'National Chairperson', name: 'Yaw Antwi', pct: 47 },
+        { position: 'Deputy Chairperson', name: 'Grace Appiah', pct: 52 },
+        { position: 'General Secretary', name: 'Robert Sarpong', pct: 44 },
+        { position: 'National Youth Organizer', name: 'Abena Yeboah', pct: 59 },
+      ],
+    },
+  ];
+
+  constituencies = ['Ashanti Central', 'Tamale North', 'Cape Coast', 'Ho West', 'Kumasi South', 'Accra East', 'Sekondi', 'Sunyani'];
+  demoFirstNames = ['Kofi', 'Ama', 'Yaw', 'Adwoa', 'Kwabena', 'Akosua', 'Kojo', 'Efua', 'Kwame', 'Abena', 'Kwesi', 'Akua'];
+  demoLastNames = ['Mensah', 'Boateng', 'Owusu', 'Asante', 'Darko', 'Frimpong', 'Adjei', 'Sarpong', 'Appiah', 'Tetteh'];
+
+  voterRoster = (() => {
+    const first = ['Kofi', 'Ama', 'Yaw', 'Adwoa', 'Kwabena', 'Akosua', 'Kojo', 'Efua', 'Kwame', 'Abena', 'Kwesi', 'Akua', 'Nana', 'Adjoa', 'Fiifi', 'Yaa', 'Kwaku', 'Esi', 'Kobina', 'Afia', 'Ekow', 'Aba', 'Kojo', 'Serwaa'];
+    const last = ['Mensah', 'Boateng', 'Owusu', 'Asante', 'Darko', 'Frimpong', 'Adjei', 'Sarpong', 'Appiah', 'Tetteh', 'Yeboah', 'Osei'];
+    const constituencies = ['Ashanti Central', 'Tamale North', 'Cape Coast', 'Ho West', 'Kumasi South', 'Accra East', 'Sekondi', 'Sunyani'];
+    const rows = [];
+    for (let i = 0; i < 24; i++) {
+      rows.push({
+        id: 'v' + i,
+        name: first[i % first.length] + ' ' + last[(i * 5) % last.length],
+        memberId: 'NDC-' + (200441 + i * 211),
+        constituency: constituencies[i % constituencies.length],
+        hasVoted: i % 3 !== 0,
+      });
+    }
+    return rows;
+  })();
+
+  swatchColors = ['oklch(0.55 0.14 255)', 'oklch(0.6 0.14 155)', 'oklch(0.62 0.16 40)', 'oklch(0.58 0.14 300)', 'oklch(0.58 0.16 20)'];
+  TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+
+  goDashboard = () => this.setState({ view: 'dashboard' });
+  goManage = () => this.setState({ view: 'manage' });
+  goVoterData = () => this.setState({ view: 'voterdata' });
+  goVoterImportTab = () => this.setState({ voterSubTab: 'import' });
+  goVoterViewTab = () => this.setState({ voterSubTab: 'view' });
+  onVoterSearchChange = (e) => this.setState({ voterSearch: e.target.value });
+  goElections = () => this.setState({ view: 'elections' });
+
+  onEndElection = () => this.setState({ election: { ...this.state.election, status: 'ended' } });
+
+  onExtendHoursChange = (e) => {
+    const n = parseInt(e.target.value, 10);
+    this.setState({ extendHoursInput: isNaN(n) ? '' : Math.max(1, Math.min(24, n)) });
+  };
+
+  onExtendElection = () => {
+    const hours = parseInt(this.state.extendHoursInput, 10) || 0;
+    if (hours <= 0) return;
+    this.setState({ election: { ...this.state.election, closes: this.bumpClosesBy(this.state.election.closes, hours), extendHours: this.state.election.extendHours + hours } });
+  };
+
+  onStartElection = () => this.setState({ election: { ...this.state.election, status: 'active', extendHours: 0 } });
+
+  bumpClosesBy = (closesStr, hoursToAdd) => {
+    const match = closesStr.match(/(\d+):(\d+) (AM|PM)/);
+    if (!match) return closesStr;
+    let hour = parseInt(match[1], 10) % 12;
+    let period = match[3];
+    let totalHour = period === 'PM' ? hour + 12 : hour;
+    totalHour = (totalHour + hoursToAdd) % 24;
+    let displayHour = totalHour % 12;
+    if (displayHour === 0) displayHour = 12;
+    const newPeriod = totalHour < 12 ? 'AM' : 'PM';
+    return closesStr.replace(match[0], displayHour + ':' + match[2] + ' ' + newPeriod);
+  };
+
+  onOpenDetails = (id) => this.setState({ showDetailsForId: id });
+  onCloseDetails = () => this.setState({ showDetailsForId: null });
+
+  formatDateTimeLocal = (val) => {
+    if (!val) return '';
+    const d = new Date(val);
+    if (isNaN(d)) return val;
+    const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    return dateStr + ' · ' + timeStr;
+  };
+
+  onOpenScheduleModal = () => this.setState({ showScheduleModal: true, newSchedName: '', newSchedStart: '', newSchedEnd: '' });
+  onCancelScheduleModal = () => this.setState({ showScheduleModal: false });
+  onNewSchedNameChange = (e) => this.setState({ newSchedName: e.target.value });
+  onNewSchedStartChange = (e) => this.setState({ newSchedStart: e.target.value });
+  onNewSchedEndChange = (e) => this.setState({ newSchedEnd: e.target.value });
+
+  onCreateSchedule = () => {
+    const { newSchedName, newSchedStart, newSchedEnd } = this.state;
+    if (!newSchedName.trim() || !newSchedStart || !newSchedEnd) return;
+    const item = {
+      id: 'sched-' + Date.now(),
+      name: newSchedName.trim(),
+      opens: this.formatDateTimeLocal(newSchedStart),
+      closes: this.formatDateTimeLocal(newSchedEnd),
+    };
+    this.setState({ scheduledElections: [...this.state.scheduledElections, item], showScheduleModal: false });
+  };
+
+  onCancelScheduled = (id) => this.setState({ scheduledElections: this.state.scheduledElections.filter(s => s.id !== id) });
+
+  goUserAdmin = () => this.setState({ view: 'useradmin' });
+
+  onOpenCreateRole = () => {
+    const perms = {};
+    this.permissionList.forEach(p => perms[p.key] = false);
+    this.setState({ showRoleModal: true, editingRoleId: null, newRoleName: '', newRolePermissions: perms });
+  };
+
+  onOpenEditRole = (id) => {
+    const role = this.state.roles.find(r => r.id === id);
+    if (!role) return;
+    this.setState({ showRoleModal: true, editingRoleId: id, newRoleName: role.name, newRolePermissions: { ...role.permissions } });
+  };
+
+  onCancelRoleModal = () => this.setState({ showRoleModal: false });
+  onNewRoleNameChange = (e) => this.setState({ newRoleName: e.target.value });
+  toggleNewRolePermission = (key) => this.setState({ newRolePermissions: { ...this.state.newRolePermissions, [key]: !this.state.newRolePermissions[key] } });
+
+  onSaveRole = () => {
+    if (!this.state.newRoleName.trim()) return;
+    if (this.state.editingRoleId) {
+      const roles = this.state.roles.map(r => r.id === this.state.editingRoleId ? { ...r, name: this.state.newRoleName.trim(), permissions: { ...this.state.newRolePermissions } } : r);
+      this.setState({ roles, showRoleModal: false });
+    } else {
+      const role = { id: 'role-' + Date.now(), name: this.state.newRoleName.trim(), isDefault: false, permissions: { ...this.state.newRolePermissions } };
+      this.setState({ roles: [...this.state.roles, role], showRoleModal: false });
+    }
+  };
+
+  onDeleteRole = (id) => this.setState({ roles: this.state.roles.filter(r => r.id !== id) });
+
+  onStartScheduledNow = (id) => {
+    const item = this.state.scheduledElections.find(s => s.id === id);
+    if (!item) return;
+    this.setState({
+      election: { name: item.name, status: 'active', opens: item.opens, closes: item.closes, extendHours: 0 },
+      scheduledElections: this.state.scheduledElections.filter(s => s.id !== id),
+    });
+  };
+
+  onFileChosen = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const sizeKb = Math.max(1, Math.round(file.size / 1024));
+    this.setState({ voterFileName: file.name, voterFileSize: sizeKb + ' KB', importDone: false });
+  };
+
+  onResetFile = () => this.setState({ voterFileName: null, voterFileSize: '', importDone: false, isProcessing: false });
+
+  onProcessImport = () => {
+    this.setState({ isProcessing: true });
+    setTimeout(() => this.setState({ isProcessing: false, importDone: true }), 1400);
+  };
+
+  generateVoterRows = () => {
+    const rows = [];
+    const statuses = ['Valid', 'Valid', 'Valid', 'Valid', 'Duplicate', 'Error'];
+    for (let i = 0; i < 8; i++) {
+      const first = this.demoFirstNames[i % this.demoFirstNames.length];
+      const last = this.demoLastNames[(i * 3) % this.demoLastNames.length];
+      rows.push({
+        name: first + ' ' + last,
+        memberId: 'NDC-' + (200000 + i * 173),
+        constituency: this.constituencies[i % this.constituencies.length],
+        status: statuses[i % statuses.length],
+      });
+    }
+    return rows;
+  };
+
+  toggleVisibility = (id) => this.setState({ visibility: { ...this.state.visibility, [id]: !this.state.visibility[id] } });
+  toggleSort = () => this.setState({ sortByVotes: !this.state.sortByVotes });
+
+  onSimulateVotes = () => {
+    const positions = this.state.positions.map(p => ({
+      ...p,
+      candidates: p.candidates.map(c => ({ ...c, votes: c.votes + Math.floor(Math.random() * 400) })),
+    }));
+    this.setState({ positions });
+  };
+
+  onOpenAddPosition = () => this.setState({ showAddPosition: true, newPositionTitle: '', newPositionDesc: '' });
+  onCancelAddPosition = () => this.setState({ showAddPosition: false });
+  onNewPositionTitleChange = (e) => this.setState({ newPositionTitle: e.target.value });
+  onNewPositionDescChange = (e) => this.setState({ newPositionDesc: e.target.value });
+  onCreatePosition = () => {
+    if (!this.state.newPositionTitle.trim()) return;
+    const id = 'pos-' + Date.now();
+    const positions = [...this.state.positions, { id, title: this.state.newPositionTitle.trim(), description: this.state.newPositionDesc.trim() || 'No description provided.', candidates: [] }];
+    this.setState({ positions, showAddPosition: false, visibility: { ...this.state.visibility, [id]: true } });
+  };
+
+  deletePosition = (id) => {
+    const positions = this.state.positions.filter(p => p.id !== id);
+    this.setState({ positions });
+  };
+
+  onOpenAddCandidate = (posId, posTitle) => this.setState({ showAddCandidate: true, addCandidateForPosId: posId, newCandidateName: '', newCandidateTagline: '', newCandidateColor: this.swatchColors[0], newCandidatePhoto: null });
+  onCancelAddCandidate = () => this.setState({ showAddCandidate: false });
+  onNewCandidateNameChange = (e) => this.setState({ newCandidateName: e.target.value });
+  onNewCandidateTaglineChange = (e) => this.setState({ newCandidateTagline: e.target.value });
+  selectCandidateColor = (color) => this.setState({ newCandidateColor: color });
+
+  onCandidatePhotoChosen = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => this.setState({ newCandidatePhoto: reader.result });
+    reader.readAsDataURL(file);
+  };
+  onRemoveCandidatePhoto = () => this.setState({ newCandidatePhoto: null });
+
+  onCreateCandidate = () => {
+    if (!this.state.newCandidateName.trim()) return;
+    const initials = this.state.newCandidateName.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const photo = this.state.newCandidatePhoto;
+    const positions = this.state.positions.map(p => {
+      if (p.id !== this.state.addCandidateForPosId) return p;
+      return { ...p, candidates: [...p.candidates, { id: 'cand-' + Date.now(), name: this.state.newCandidateName.trim(), initials, tagline: this.state.newCandidateTagline.trim() || 'New candidate', avatarColor: this.state.newCandidateColor, photo, votes: 0 }] };
+    });
+    this.setState({ positions, showAddCandidate: false });
+  };
+
+  deleteCandidate = (posId, candId) => {
+    const positions = this.state.positions.map(p => p.id === posId ? { ...p, candidates: p.candidates.filter(c => c.id !== candId) } : p);
+    this.setState({ positions });
+  };
+
+  renderVals() {
+    const s = this.state;
+
+    const totalVotes = s.positions.reduce((sum, p) => sum + p.candidates.reduce((s2, c) => s2 + c.votes, 0), 0);
+    // Use chair position's total as the "ballots cast" figure (one ballot covers all positions)
+    const chairTotal = (s.positions.find(p => p.id === 'chair')?.candidates || []).reduce((s2, c) => s2 + c.votes, 0) || totalVotes / (s.positions.length || 1);
+
+    const buildResultPositions = (onlyVisible) => s.positions
+      .filter(p => !onlyVisible || s.visibility[p.id] !== false)
+      .map(p => {
+        const posTotal = p.candidates.reduce((s2, c) => s2 + c.votes, 0) || 1;
+        let candidates = p.candidates.map(c => ({
+          ...c,
+          pct: Math.round((c.votes / posTotal) * 100),
+          photoStyle: c.photo
+            ? { width: 26, height: 26, borderRadius: '50%', backgroundImage: 'url(' + c.photo + ')', backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: 0 }
+            : { display: 'none' },
+          silhouetteDisplay: c.photo ? 'none' : 'block',
+        }));
+        candidates = s.sortByVotes ? candidates.sort((a, b) => b.votes - a.votes) : candidates.slice().sort((a, b) => a.name.localeCompare(b.name));
+        return { id: p.id, title: p.title, totalVotes: posTotal.toLocaleString(), candidates };
+      });
+
+    const visiblePositions = buildResultPositions(true);
+
+    const navItems = [
+      { label: 'Dashboard', onClick: this.goDashboard, bg: s.view === 'dashboard' ? 'oklch(0.94 0.03 255)' : 'transparent', color: s.view === 'dashboard' ? 'oklch(0.42 0.13 255)' : 'oklch(0.4 0.02 260)' },
+      { label: 'Positions & Candidates', onClick: this.goManage, bg: s.view === 'manage' ? 'oklch(0.94 0.03 255)' : 'transparent', color: s.view === 'manage' ? 'oklch(0.42 0.13 255)' : 'oklch(0.4 0.02 260)' },
+      { label: 'Voter Data', onClick: this.goVoterData, bg: (s.view === 'voterdata' || s.view === 'viewvoters') ? 'oklch(0.94 0.03 255)' : 'transparent', color: (s.view === 'voterdata' || s.view === 'viewvoters') ? 'oklch(0.42 0.13 255)' : 'oklch(0.4 0.02 260)' },
+      { label: 'Elections', onClick: this.goElections, bg: s.view === 'elections' ? 'oklch(0.94 0.03 255)' : 'transparent', color: s.view === 'elections' ? 'oklch(0.42 0.13 255)' : 'oklch(0.4 0.02 260)' },
+      { label: 'User Admin', onClick: this.goUserAdmin, bg: s.view === 'useradmin' ? 'oklch(0.94 0.03 255)' : 'transparent', color: s.view === 'useradmin' ? 'oklch(0.42 0.13 255)' : 'oklch(0.4 0.02 260)' },
+    ];
+
+    const visibilityToggles = s.positions.map(p => {
+      const visible = s.visibility[p.id] !== false;
+      return {
+        label: p.title,
+        visible,
+        onToggle: () => this.toggleVisibility(p.id),
+        bg: visible ? 'oklch(0.94 0.03 255)' : '#fff',
+        borderColor: visible ? 'oklch(0.7 0.1 255)' : 'oklch(0.88 0.01 250)',
+        textColor: visible ? 'oklch(0.35 0.1 255)' : 'oklch(0.5 0.02 260)',
+        checkBorder: visible ? 'oklch(0.42 0.13 255)' : 'oklch(0.8 0.01 250)',
+        checkBg: visible ? 'oklch(0.42 0.13 255)' : 'transparent',
+      };
+    });
+
+    const managePositions = s.positions.map(p => ({
+      title: p.title,
+      description: p.description,
+      onDelete: () => this.deletePosition(p.id),
+      onAddCandidate: () => this.onOpenAddCandidate(p.id, p.title),
+      candidates: p.candidates.map(c => ({
+        ...c,
+        votes: c.votes.toLocaleString(),
+        photoStyle: c.photo
+          ? { width: 34, height: 34, borderRadius: '50%', backgroundImage: 'url(' + c.photo + ')', backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: 0 }
+          : { display: 'none' },
+        silhouetteDisplay: c.photo ? 'none' : 'block',
+        onDelete: () => this.deleteCandidate(p.id, c.id),
+      })),
+    }));
+
+    const colorSwatches = this.swatchColors.map(color => ({ color, onSelect: () => this.selectCandidateColor(color), ringColor: s.newCandidateColor === color ? 'oklch(0.3 0.05 260)' : 'transparent' }));
+
+    const addPositionTitle = s.positions.find(p => p.id === s.addCandidateForPosId)?.title || '';
+
+    const rawRows = s.importDone ? this.generateVoterRows() : [];
+    const statusStyles = {
+      Valid: { bg: 'oklch(0.94 0.06 155)', color: 'oklch(0.4 0.14 155)' },
+      Duplicate: { bg: 'oklch(0.95 0.05 80)', color: 'oklch(0.5 0.14 80)' },
+      Error: { bg: 'oklch(0.95 0.04 25)', color: 'oklch(0.5 0.19 25)' },
+    };
+    const voterRows = rawRows.map(r => ({ ...r, statusBg: statusStyles[r.status].bg, statusColor: statusStyles[r.status].color }));
+    const importStats = {
+      total: rawRows.length,
+      valid: rawRows.filter(r => r.status === 'Valid').length,
+      duplicates: rawRows.filter(r => r.status === 'Duplicate').length,
+      errors: rawRows.filter(r => r.status === 'Error').length,
+    };
+
+    const query = s.voterSearch.trim().toLowerCase();
+    const filteredVoters = this.voterRoster.filter(v =>
+      !query || v.name.toLowerCase().includes(query) || v.memberId.toLowerCase().includes(query)
+    ).map(v => ({
+      ...v,
+      votedLabel: v.hasVoted ? 'Voted' : 'Not Voted',
+      votedBg: v.hasVoted ? 'oklch(0.94 0.06 155)' : 'oklch(0.95 0.01 250)',
+      votedColor: v.hasVoted ? 'oklch(0.4 0.14 155)' : 'oklch(0.5 0.02 260)',
+    }));
+    const votedCount = this.voterRoster.filter(v => v.hasVoted).length;
+
+    return {
+      isDashboard: s.view === 'dashboard',
+      isManage: s.view === 'manage',
+      isVoterData: s.view === 'voterdata',
+      isImportTab: s.voterSubTab === 'import',
+      isViewTab: s.voterSubTab === 'view',
+      onGoImportTab: this.goVoterImportTab,
+      onGoViewTab: this.goVoterViewTab,
+      importTabBg: s.voterSubTab === 'import' ? '#fff' : 'transparent',
+      importTabColor: s.voterSubTab === 'import' ? 'oklch(0.42 0.13 255)' : 'oklch(0.5 0.02 260)',
+      viewTabBg: s.voterSubTab === 'view' ? '#fff' : 'transparent',
+      viewTabColor: s.voterSubTab === 'view' ? 'oklch(0.42 0.13 255)' : 'oklch(0.5 0.02 260)',
+      navItems,
+
+      voterSearch: s.voterSearch,
+      onVoterSearchChange: this.onVoterSearchChange,
+      filteredVoters,
+      totalRegistered: this.voterRoster.length,
+      votedCount,
+      notVotedCount: this.voterRoster.length - votedCount,
+      noVotersFound: filteredVoters.length === 0,
+
+      isElections: s.view === 'elections',
+      election: s.election,
+      isElectionActive: s.election.status === 'active',
+      isElectionEnded: s.election.status === 'ended',
+      electionStatusBg: s.election.status === 'active' ? 'oklch(0.94 0.06 155)' : 'oklch(0.95 0.01 250)',
+      electionStatusColor: s.election.status === 'active' ? 'oklch(0.4 0.14 155)' : 'oklch(0.5 0.02 260)',
+      electionStatusLabel: s.election.status === 'active' ? 'Active' : 'Ended',
+      onEndElection: this.onEndElection,
+      onStartElection: this.onStartElection,
+      onExtendElection: this.onExtendElection,
+      extendHoursInput: s.extendHoursInput,
+      onExtendHoursChange: this.onExtendHoursChange,
+      pastElections: this.pastElections.map(e => ({ ...e, onOpenDetails: () => this.onOpenDetails(e.id) })),
+      showElectionDetails: !!s.showDetailsForId,
+      electionDetails: this.pastElections.find(e => e.id === s.showDetailsForId) || {},
+      onCloseDetails: this.onCloseDetails,
+
+      onOpenScheduleModal: this.onOpenScheduleModal,
+      hasScheduled: s.scheduledElections.length > 0,
+      scheduledElections: s.scheduledElections.map(item => ({
+        ...item,
+        onStartNow: () => this.onStartScheduledNow(item.id),
+        onCancel: () => this.onCancelScheduled(item.id),
+      })),
+
+      showScheduleModal: s.showScheduleModal,
+      newSchedName: s.newSchedName,
+      newSchedStart: s.newSchedStart,
+      newSchedEnd: s.newSchedEnd,
+      onNewSchedNameChange: this.onNewSchedNameChange,
+      onNewSchedStartChange: this.onNewSchedStartChange,
+      onNewSchedEndChange: this.onNewSchedEndChange,
+      onCancelScheduleModal: this.onCancelScheduleModal,
+      onCreateSchedule: this.onCreateSchedule,
+      scheduleDisabled: !s.newSchedName.trim() || !s.newSchedStart || !s.newSchedEnd,
+      scheduleBtnBg: (s.newSchedName.trim() && s.newSchedStart && s.newSchedEnd) ? 'oklch(0.42 0.13 255)' : 'oklch(0.85 0.01 250)',
+
+      isUserAdmin: s.view === 'useradmin',
+      roleCards: s.roles.map(r => ({
+        id: r.id,
+        name: r.name,
+        isDefault: r.isDefault,
+        onEdit: () => this.onOpenEditRole(r.id),
+        onDelete: () => this.onDeleteRole(r.id),
+        permChips: this.permissionList.filter(p => r.permissions[p.key]).map(p => p.label),
+        hasNoPerms: this.permissionList.filter(p => r.permissions[p.key]).length === 0,
+      })),
+      onOpenCreateRole: this.onOpenCreateRole,
+
+      showRoleModal: s.showRoleModal,
+      isEditingRole: !!s.editingRoleId,
+      roleModalTitle: s.editingRoleId ? 'Edit Role' : 'Create Role',
+      newRoleName: s.newRoleName,
+      onNewRoleNameChange: this.onNewRoleNameChange,
+      onCancelRoleModal: this.onCancelRoleModal,
+      onSaveRole: this.onSaveRole,
+      roleSaveDisabled: !s.newRoleName.trim(),
+      roleSaveBg: s.newRoleName.trim() ? 'oklch(0.42 0.13 255)' : 'oklch(0.85 0.01 250)',
+      permissionToggles: this.permissionList.map(p => ({
+        key: p.key,
+        label: p.label,
+        checked: !!s.newRolePermissions[p.key],
+        onToggle: () => this.toggleNewRolePermission(p.key),
+        checkBorder: s.newRolePermissions[p.key] ? 'oklch(0.42 0.13 255)' : 'oklch(0.8 0.01 250)',
+        checkBg: s.newRolePermissions[p.key] ? 'oklch(0.42 0.13 255)' : 'transparent',
+      })),
+
+      showDropzone: !s.voterFileName,
+      showFileCard: !!s.voterFileName && !s.importDone,
+      showImportSummary: s.importDone,
+      onFileChosen: this.onFileChosen,
+      onResetFile: this.onResetFile,
+      onProcessImport: this.onProcessImport,
+      voterFileName: s.voterFileName,
+      voterFileSize: s.voterFileSize,
+      isProcessing: s.isProcessing,
+      processButtonLabel: s.isProcessing ? 'Processing…' : 'Process Import',
+      voterRows,
+      importStats,
+
+      totalVotesFormatted: Math.round(chairTotal).toLocaleString(),
+      turnoutPct: Math.min(99, Math.round((chairTotal / 62000) * 100)),
+
+      onSimulateVotes: this.onSimulateVotes,
+      visibilityToggles,
+      onToggleSort: this.toggleSort,
+      sortByVotesBg: s.sortByVotes ? '#fff' : 'transparent',
+      sortByVotesColor: s.sortByVotes ? 'oklch(0.42 0.13 255)' : 'oklch(0.5 0.02 260)',
+      sortAlphaBg: !s.sortByVotes ? '#fff' : 'transparent',
+      sortAlphaColor: !s.sortByVotes ? 'oklch(0.42 0.13 255)' : 'oklch(0.5 0.02 260)',
+      visiblePositions,
+
+      managePositions,
+      onOpenAddPosition: this.onOpenAddPosition,
+
+      showAddPosition: s.showAddPosition,
+      newPositionTitle: s.newPositionTitle,
+      newPositionDesc: s.newPositionDesc,
+      onNewPositionTitleChange: this.onNewPositionTitleChange,
+      onNewPositionDescChange: this.onNewPositionDescChange,
+      onCancelAddPosition: this.onCancelAddPosition,
+      onCreatePosition: this.onCreatePosition,
+      addPositionDisabled: !s.newPositionTitle.trim(),
+      addPositionBg: s.newPositionTitle.trim() ? 'oklch(0.42 0.13 255)' : 'oklch(0.85 0.01 250)',
+
+      showAddCandidate: s.showAddCandidate,
+      addCandidatePositionTitle: addPositionTitle,
+      newCandidateName: s.newCandidateName,
+      newCandidateTagline: s.newCandidateTagline,
+      onNewCandidateNameChange: this.onNewCandidateNameChange,
+      onNewCandidateTaglineChange: this.onNewCandidateTaglineChange,
+      colorSwatches,
+      newCandidatePhotoStyle: s.newCandidatePhoto
+        ? { width: 64, height: 64, borderRadius: '50%', backgroundImage: 'url(' + s.newCandidatePhoto + ')', backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: 0 }
+        : { display: 'none' },
+      hasCandidatePhoto: !!s.newCandidatePhoto,
+      onCandidatePhotoChosen: this.onCandidatePhotoChosen,
+      onRemoveCandidatePhoto: this.onRemoveCandidatePhoto,
+      onCancelAddCandidate: this.onCancelAddCandidate,
+      onCreateCandidate: this.onCreateCandidate,
+      addCandidateDisabled: !s.newCandidateName.trim(),
+      addCandidateBg: s.newCandidateName.trim() ? 'oklch(0.42 0.13 255)' : 'oklch(0.85 0.01 250)',
+    };
+  }
+}
+
+</script>
+</body>
+</html>
